@@ -324,7 +324,7 @@ input:focus{border-color:var(--g600);background:var(--sur);}
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwXqN3sXWPifSl1oZ8mS32EBh44aZw7EoltQGbB0HGHWvZeKM2dbxcrGiJr9r47FXY/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyx9RzFdzDu-uM5bJfWaGuipsMYgodWWOyekZ5jJpQl092Us2GFIf_7JxhjT-tEDKYH/exec';
 const MESES = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
 const SK = 'viatura_v3';
 
@@ -377,27 +377,43 @@ function setSync(status, msg) {
 
 // ── GRAVAR NA PLANILHA via Apps Script ──
 async function gravarPlanilha(reg) {
-  const payload = {
-    data: reg.data,
-    horaSaida: reg.horaSaida,
-    horaChegada: reg.horaChegada,
-    opGrad: reg.opGrad,
-    opRe: reg.opRe,
-    kmIni: reg.kmIni,
-    kmFim: reg.kmFim,
-    kmAbast: reg.abastecimento ? reg.kmAbast : null,
-    litros: reg.abastecimento ? reg.litros : null,
-    destino: reg.destino
-  };
+  return new Promise((resolve, reject) => {
+    const cbName = 'cb_' + Date.now();
+    const params = new URLSearchParams({
+      data:       reg.data,
+      horaSaida:  reg.horaSaida,
+      horaChegada:reg.horaChegada,
+      opGrad:     reg.opGrad,
+      opRe:       reg.opRe,
+      kmIni:      reg.kmIni,
+      kmFim:      reg.kmFim,
+      kmAbast:    reg.abastecimento && reg.kmAbast ? reg.kmAbast : '',
+      litros:     reg.abastecimento && reg.litros  ? reg.litros  : '',
+      destino:    reg.destino,
+      callback:   cbName
+    });
 
-  const resp = await fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(payload)
+    const script = document.createElement('script');
+    const timer = setTimeout(() => {
+      cleanup();
+      reject(new Error('Timeout — verifique a conexão'));
+    }, 15000);
+
+    function cleanup() {
+      clearTimeout(timer);
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    window[cbName] = function(resp) {
+      cleanup();
+      if (resp && resp.ok) resolve(resp);
+      else reject(new Error(resp ? resp.erro : 'Erro desconhecido'));
+    };
+
+    script.src = SCRIPT_URL + '?' + params.toString();
+    document.head.appendChild(script);
   });
-  // no-cors retorna opaque — consideramos sucesso se não lançar exceção
-  return true;
 }
 
 // ── TOPBAR ──
