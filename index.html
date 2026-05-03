@@ -296,13 +296,17 @@ input:focus{border-color:var(--g600);background:var(--sur);}
           </div>
         </div>
       </div>
-      <div style="text-align:center;padding:12px 0 4px;">
-        <div style="font-family:var(--mono);font-size:10px;color:var(--txt3);">v3.0 · 2º BPAmb SA2 · Apps Script integrado</div>
+      <div style="text-align:center;padding:8px 0 4px;">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--txt3);">v3.0 · 2º BPAmb SA2</div>
       </div>
     </div>
 
   </div>
 
+  <div style="text-align:center;padding:10px 20px 6px;background:var(--sur);border-top:0.5px solid var(--bdr);">
+    <div style="font-size:9px;color:var(--txt3);font-family:var(--mono);letter-spacing:0.08em;text-transform:uppercase;">Desenvolvido por</div>
+    <div style="font-size:12px;font-weight:600;color:var(--txt2);margin-top:1px;letter-spacing:0.01em;">Renan Ramos Manduca</div>
+  </div>
   <div class="tab-bar">
     <button class="tab active" onclick="showTab('saida',0)">
       <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -320,7 +324,7 @@ input:focus{border-color:var(--g600);background:var(--sur);}
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwIxFUBnVcdaqxSbGDVMHSoqmnXlCurHqcMzfsV6NQUrRv5Fj42bU5X-EYh38Re_Nxl/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwXqN3sXWPifSl1oZ8mS32EBh44aZw7EoltQGbB0HGHWvZeKM2dbxcrGiJr9r47FXY/exec';
 const MESES = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
 const SK = 'viatura_v3';
 
@@ -335,7 +339,7 @@ function dflt() {
     operadores:[
       {id:'op1',grad:'SD PM',re:'157621-6'},
       {id:'op2',grad:'SD PM',re:'151086-0'},
-      {id:'op3',grad:'SD PM',re:'000000-0'}
+      {id:'op3',grad:'1º Sgt PM',re:'106113-5',nome:'ALYSON R. N. CARNEIRO'}
     ],
     destinos:['BAURU','BAURU/JAÚ','BAURU/BOCAINA','BAURU/BARIRI','BAURU/BARRA BONITA','IACANGA','BAURU/LINS','PEDERNEIRAS'],
     registros:[],
@@ -403,13 +407,15 @@ function renderTopbar() {
   document.getElementById('topbar-sub').textContent   = v?v.marca+' '+v.modelo+' · '+v.placa:'';
   document.getElementById('topbar-badge').textContent = getMes();
   const el=document.getElementById('vtr-selector'); el.innerHTML='';
-  st.viaturas.forEach(v=>{
-    const c=document.createElement('div');
-    c.className='vtr-chip'+(v.id===st.viaturaAtiva?' active':'');
-    c.textContent=v.prefixo;
-    c.onclick=()=>{st.viaturaAtiva=v.id;save();renderAll();};
-    el.appendChild(c);
-  });
+  if(st.viaturas.length > 1) {
+    st.viaturas.forEach(v=>{
+      const c=document.createElement('div');
+      c.className='vtr-chip'+(v.id===st.viaturaAtiva?' active':'');
+      c.textContent=v.prefixo;
+      c.onclick=()=>{st.viaturaAtiva=v.id;save();renderAll();};
+      el.appendChild(c);
+    });
+  }
 }
 
 // ── SAÍDA ──
@@ -423,7 +429,7 @@ function renderSaida() {
   st.operadores.forEach(op=>{
     const c=document.createElement('div');
     c.className='user-chip'+(op.id===opSel?' sel':'');
-    c.textContent=op.grad+' '+op.re;
+    c.textContent=op.nome ? op.grad+' '+op.re+' · '+op.nome : op.grad+' '+op.re;
     c.onclick=()=>{opSel=op.id;renderSaida();};
     pk.appendChild(c);
   });
